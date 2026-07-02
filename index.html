@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Central de Atendimento - RC Fácil</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:#f0f4f8;color:#2d3748}
+:root{
+  --primary:#8B0000;
+  --primary-dark:#6B0000;
+  --gold:#D4AF37;
+  --border:#e2e8f0;
+  --shadow:0 4px 6px rgba(0,0,0,.07);
+}
+.header{
+  background:linear-gradient(135deg,var(--primary) 0%,var(--primary-dark) 100%);
+  color:#fff;padding:0 2rem;display:flex;align-items:center;
+  justify-content:space-between;height:70px;
+  box-shadow:0 2px 10px rgba(0,0,0,.3);position:sticky;top:0;z-index:100;
+}
+.logo-circle{
+  width:44px;height:44px;background:var(--gold);border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-weight:900;font-size:1.1rem;color:var(--primary);margin-right:12px;
+}
+.header-brand{display:flex;align-items:center}
+.header-brand h1{font-size:1.15rem;font-weight:700}
+.header-brand p{font-size:.75rem;opacity:.8;margin-top:2px}
+.btn-admin{
+  background:var(--gold);color:var(--primary);padding:8px 18px;
+  border-radius:20px;font-weight:700;font-size:.85rem;
+  text-decoration:none;transition:.2s;
+}
+.btn-admin:hover{opacity:.9;transform:translateY(-1px)}
+.container{max-width:1300px;margin:0 auto;padding:2rem 1.5rem}
+.page-title{margin-bottom:1.5rem}
+.page-title h2{font-size:1.5rem;color:var(--primary);font-weight:700}
+.page-title p{color:#718096;font-size:.9rem;margin-top:4px}
+.cards-grid{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+  gap:1rem;margin-bottom:2rem;
+}
+.stat-card{
+  background:#fff;border-radius:12px;padding:1.5rem;
+  box-shadow:var(--shadow);border-left:4px solid var(--primary);
+}
+.stat-card.gold{border-left-color:var(--gold)}
+.stat-card.green{border-left-color:#38a169}
+.stat-card.blue{border-left-color:#3182ce}
+.stat-card .label{
+  font-size:.78rem;color:#718096;font-weight:700;
+  text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:.5rem;
+}
+.stat-card .value{font-size:2.2rem;font-weight:800;color:#2d3748;display:block}
+.stat-card .sub{font-size:.78rem;color:#a0aec0;display:block;margin-top:4px}
+.main-grid{display:grid;grid-template-columns:1fr 360px;gap:1.5rem}
+@media(max-width:900px){.main-grid{grid-template-columns:1fr}}
+.card{background:#fff;border-radius:12px;box-shadow:var(--shadow);overflow:hidden;margin-bottom:1.5rem}
+.card-header{
+  padding:1rem 1.5rem;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.card-header h3{font-size:1rem;font-weight:700;color:#2d3748}
+.card-body{padding:1.5rem}
+.search-bar{display:flex;gap:.75rem;margin-bottom:1.25rem;flex-wrap:wrap}
+.search-bar input,.search-bar select{
+  flex:1;min-width:140px;padding:9px 13px;
+  border:1px solid var(--border);border-radius:8px;font-size:.88rem;outline:none;
+}
+.search-bar input:focus,.search-bar select:focus{
+  border-color:var(--primary);box-shadow:0 0 0 3px rgba(139,0,0,.1);
+}
+.btn{padding:9px 20px;border-radius:8px;font-size:.88rem;font-weight:600;cursor:pointer;border:none;transition:.2s}
+.btn-primary{background:var(--primary);color:#fff}
+.btn-primary:hover{background:var(--primary-dark)}
+.btn-success{background:#38a169;color:#fff}
+.btn-success:hover{background:#2f855a}
+.ticket-table{width:100%;border-collapse:collapse}
+.ticket-table th{
+  padding:10px 14px;text-align:left;font-size:.75rem;font-weight:700;
+  color:#718096;text-transform:uppercase;letter-spacing:.5px;
+  border-bottom:2px solid var(--border);background:#f7fafc;
+}
+.ticket-table td{
+  padding:11px 14px;font-size:.87rem;
+  border-bottom:1px solid var(--border);vertical-align:middle;
+}
+.ticket-table tr:hover td{background:#f7fafc}
+.ticket-table tr:last-child td{border-bottom:none}
+.badge{
+  display:inline-flex;align-items:center;padding:4px 10px;
+  border-radius:20px;font-size:.73rem;font-weight:700;
+}
+.badge-aberto{background:#ebf8ff;color:#2b6cb0}
+.badge-andamento{background:#fefcbf;color:#744210}
+.badge-concluido{background:#f0fff4;color:#276749}
+.badge-cancelado{background:#f7fafc;color:#4a5568}
+.priority-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:5px}
+.p-high{background:#e53e3e}
+.p-medium{background:#dd6b20}
+.p-low{background:#38a169}
+.ticket-id{font-family:monospace;font-weight:700;color:var(--primary);font-size:.82rem}
+.ticket-title{
+  font-weight:600;color:#2d3748;max-width:200px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.ticket-sub{color:#718096;font-size:.78rem}
+.action-btn{
+  padding:4px 10px;border-radius:6px;font-size:.73rem;
+  font-weight:600;cursor:pointer;border:none;margin:0 2px;
+}
+.btn-view{background:#ebf8ff;color:#2b6cb0}
+.btn-edit{background:#fefcbf;color:#744210}
+.form-group{margin-bottom:1rem}
+.form-group label{
+  display:block;font-size:.82rem;font-weight:700;
+  color:#4a5568;margin-bottom:5px;
+}
+.form-control{
+  width:100%;padding:9px 13px;border:1px solid var(--border);
+  border-radius:8px;font-size:.88rem;outline:none;transition:.2s;
+  font-family:inherit;
+}
+.form-control:focus{
+  border-color:var(--primary);box-shadow:0 0 0 3px rgba(139,0,0,.1);
+}
+textarea.form-control{resize:vertical;min-height:80px}
+.quick-links{display:flex;flex-direction:column;gap:.5rem}
+.quick-link{
+  display:flex;align-items:center;gap:10px;padding:11px;
+  border-radius:8px;background:#f7fafc;text-decoration:none;
+  color:#2d3748;font-size:.87rem;font-weight:600;
+  transition:.2s;border:1px solid transparent;
+}
+.quick-link:hover{background:#ebf8ff;border-color:#bee3f8;color:var(--primary)}
+.ql-icon{
+  width:30px;height:30px;border-radius:7px;
+  display:flex;align-items:center;justify-content:center;font-size:.95rem;
+}
+.activity-list{display:flex;flex-direction:column;gap:.75rem}
+.activity-item{display:flex;gap:10px;align-items:flex-start}
+.activity-dot{
+  width:9px;height:9px;border-radius:50%;
+  background:var(--primary);margin-top:4px;flex-shrink:0;
+}
+.activity-content p{font-size:.82rem;color:#2d3748;line-height:1.4}
+.activity-content span{font-size:.74rem;color:#a0aec0}
+.footer{
+  background:#2d3748;color:#a0aec0;text-align:center;
+  padding:1.25rem;font-size:.82rem;margin-top:1rem;
+}
+.footer strong{color:#fff}
+.modal-overlay{
+  display:none;position:fixed;inset:0;
+  background:rgba(0,0,0,.5);z-index:1000;
+  align-items:center;justify-content:center;
+}
+.modal-overlay.active{display:flex}
+.modal{
+  background:#fff;border-radius:16px;padding:2rem;
+  max-width:540px;width:90%;max-height:90vh;overflow-y:auto;
+  box-shadow:0 20px 60px rgba(0,0,0,.3);
+}
+.modal-header{
+  display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;
+}
+.modal-header h3{font-size:1.05rem;font-weight:700;color:var(--primary)}
+.modal-close{background:none;border:none;font-size:1.4rem;cursor:pointer;color:#718096}
+.modal-close:hover{color:#2d3748}
+.notification{
+  position:fixed;top:80px;right:1.5rem;background:#fff;
+  border-radius:10px;padding:1rem 1.5rem;
+  box-shadow:0 10px 30px rgba(0,0,0,.15);
+  border-left:4px solid #38a169;z-index:2000;
+  transform:translateX(200%);transition:.3s;max-width:300px;
+}
+.notification.show{transform:translateX(0)}
+.notification p{font-size:.87rem;font-weight:600;color:#2d3748}
+.notification small{font-size:.74rem;color:#718096}
+.tabs{display:flex;gap:.5rem;margin-bottom:1.25rem;flex-wrap:wrap}
+.tab{
+  padding:7px 16px;border-radius:20px;font-size:.85rem;
+  font-weight:600;cursor:pointer;border:none;
+  background:#f0f4f8;color:#718096;transition:.2s;
+}
+.tab.active{background:var(--primary);color:#fff}
+.tab-count{
+  display:inline-flex;align-items:center;justify-content:center;
+  background:rgba(255,255,255,.3);border-radius:10px;
+  padding:1px 7px;font-size:.72rem;margin-left:5px;
+}
+.tab:not(.active) .tab-count{background:rgba(0,0,0,.08);color:#718096}
+</style>
+</head>
+<body>
+<header class="header">
+  <div class="header-brand">
+    <div class="logo-circle">RC</div>
+    <div>
+      <h1>RC Fácil Documentos e Serviços</h1>
+      <p>Central de Atendimento ao Cliente</p>
+    </div>
+  </div>
+  <div>
+    <a href="https://admin.rcfacildocumentoseservicos.com.br/tickets/dashboard-admin" class="btn-admin" target="_blank">📊 Painel Admin</a>
+  </div>
+</header>
+
+<main class="container">
+  <div class="page-title">
+    <h2>Central de Atendimento</h2>
+    <p>Gerencie e acompanhe todos os chamados de atendimento ao cliente do Cartório RC Fácil</p>
+  </div>
+
+  <div class="cards-grid">
+    <div class="stat-card">
+      <span class="label">Total de Chamados</span>
+      <span class="value" id="totalTickets">0</span>
+      <span class="sub">Todos os períodos</span>
+    </div>
+    <div class="stat-card green">
+      <span class="label">Resolvidos</span>
+      <span class="value" id="resolvedTickets">0</span>
+      <span class="sub">Concluídos com sucesso</span>
+    </div>
+    <div class="stat-card gold">
+      <span class="label">Em Andamento</span>
+      <span class="value" id="progressTickets">0</span>
+      <span class="sub">Em atendimento ativo</span>
+    </div>
+    <div class="stat-card blue">
+      <span class="label">Aguardando</span>
+      <span class="value" id="waitingTickets">0</span>
+      <span class="sub">Pendentes de resposta</span>
+    </div>
+  </div>
+
+  <div class="main-grid">
+    <div>
+      <div class="card">
+        <div class="card-header">
+          <h3>🏦 Chamados de Atendimento</h3>
+          <button class="btn btn-primary" onclick="openNewTicket()">+ Novo Chamado</button>
+        </div>
+        <div class="card-body">
+          <div class="search-bar">
+            <input type="text" id="searchInput" placeholder="Buscar por ID, cliente ou assunto..." oninput="filterTickets()">
+            <select id="statusFilter" onchange="filterTickets()">
+              <option value="">Todos os Status</option>
+              <option value="aberto">Aberto</option>
+              <option value="andamento">Em Andamento</option>
+              <option value="concluido">Concluído</option>
+              <option value="cancelado">Cancelado</option>
+            </select>
+            <select id="priorityFilter" onchange="filterTickets()">
+              <option value="">Todas Prioridades</option>
+              <option value="alta">Alta</option>
+              <option value="media">Média</option>
+              <option value="baixa">Baixa</option>
+            </select>
+          </div>
+          <div class="tabs">
+            <button class="tab active" id="tab-todos" onclick="setTab(this,'todos')">Todos <span class="tab-count" id="cnt-todos">0</span></button>
+            <button class="tab" id="tab-aberto" onclick="setTab(this,'aberto')">Abertos <span class="tab-count" id="cnt-aberto">0</span></button>
+            <button class="tab" id="tab-andamento" onclick="setTab(this,'andamento')">Em Andamento <span class="tab-count" id="cnt-andamento">0</span></button>
+            <button class="tab" id="tab-concluido" onclick="setTab(this,'concluido')">Concluídos <span class="tab-count" id="cnt-concluido">0</span></button>
+          </div>
+          <div id="ticketTableWrap" style="overflow-x:auto">
+            <table class="ticket-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Assunto / Categoria</th>
+                  <th>Cliente</th>
+                  <th>Status</th>
+                  <th>Prioridade</th>
+                  <th>Data</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody id="ticketBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="card">
+        <div class="card-header"><h3>➕ Novo Chamado Rápido</h3></div>
+        <div class="card-body">
+          <div class="form-group">
+            <label>Nome do Cliente</label>
+            <input type="text" class="form-control" id="qClientName" placeholder="Nome completo">
+          </div>
+          <div class="form-group">
+            <label>Telefone / WhatsApp</label>
+            <input type="text" class="form-control" id="qClientPhone" placeholder="(62) 9 9999-9999">
+          </div>
+          <div class="form-group">
+            <label>Assunto</label>
+            <input type="text" class="form-control" id="qSubject" placeholder="Descreva o assunto">
+          </div>
+          <div class="form-group">
+            <label>Categoria</label>
+            <select class="form-control" id="qCategory">
+              <option>Registro Civil</option>
+              <option>Notas Públicas</option>
+              <option>Imóveis</option>
+              <option>Documentos Fiscais</option>
+              <option>Certidões</option>
+              <option>Procurações</option>
+              <option>Testamentos</option>
+              <option>Outros</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Prioridade</label>
+            <select class="form-control" id="qPriority">
+              <option value="baixa">Baixa</option>
+              <option value="media" selected>Média</option>
+              <option value="alta">Alta</option>
+            </select>
+          </div>
+          <button class="btn btn-success" style="width:100%" onclick="quickAddTicket()">✔ Abrir Chamado</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><h3>🔗 Acesso Rápido</h3></div>
+        <div class="card-body">
+          <div class="quick-links">
+            <a href="https://admin.rcfacildocumentoseservicos.com.br/tickets/dashboard-admin" class="quick-link" target="_blank">
+              <div class="ql-icon" style="background:#fff0f0">📊</div>
+              <span>Painel Administrativo</span>
+            </a>
+            <a href="https://rcfacildocumentoseservicos.com.br" class="quick-link" target="_blank">
+              <div class="ql-icon" style="background:#f0fff4">🌐</div>
+              <span>Site RC Fácil</span>
+            </a>
+            <a href="https://wa.me/556299999999" class="quick-link" target="_blank">
+              <div class="ql-icon" style="background:#f0fff4">💬</div>
+              <span>WhatsApp Suporte</span>
+            </a>
+            <a href="mailto:atendimento@rcfacildocumentoseservicos.com.br" class="quick-link">
+              <div class="ql-icon" style="background:#ebf8ff">📧</div>
+              <span>E-mail Atendimento</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><h3>🕒 Atividade Recente</h3></div>
+        <div class="card-body">
+          <div class="activity-list" id="activityList">
+            <p style="color:#a0aec0;font-size:.85rem">Nenhuma atividade ainda.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer class="footer">
+  <strong>RC Fácil Documentos e Serviços</strong> &mdash; Cartório de Goiânia &bull;
+  Central de Atendimento &copy; 2025
+</footer>
+<div class="modal-overlay" id="ticketModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="modalTitle">Detalhes do Chamado</h3>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div id="modalContent"></div>
+  </div>
+</div>
+
+<div class="notification" id="notification">
+  <p id="notifText">Chamado aberto com sucesso!</p>
+  <small>Central de Atendimento RC Fácil</small>
+</div>
+
+<script>
+var tickets = [];
+var tabFilter = 'todos';
+var categories = ['Registro Civil','Notas Públicas','Imóveis','Documentos Fiscais','Certidões','Procurações','Testamentos','Outros'];
+var statuses = ['aberto','andamento','concluido','cancelado'];
+
+function genId() {
+  return '#RC-' + String(Math.floor(Math.random()*90000)+10000);
+}
+function today() {
+  return new Date().toLocaleDateString('pt-BR');
+}
+
+function initTickets() {
+  tickets = [
+    {id:'#RC-10451',title:'Segunda via de certidão de nascimento',client:'Maria Aparecida Oliveira',phone:'(62) 9 8811-2233',status:'concluido',priority:'baixa',category:'Registro Civil',date:'28/06/2025',notes:'Documento entregue ao cliente sem intercorrências.'},
+    {id:'#RC-10452',title:'Reconhecimento de firma em contrato social',client:'João Paulo Pereira',phone:'(62) 9 9922-3344',status:'andamento',priority:'media',category:'Notas Públicas',date:'29/06/2025',notes:'Aguardando retorno do cliente com documentos completos.'},
+    {id:'#RC-10453',title:'Autenticação de documentos para FGTS',client:'Ana Clara Costa',phone:'(62) 9 7733-5566',status:'aberto',priority:'alta',category:'Documentos Fiscais',date:'30/06/2025',notes:'Urgente: prazo do banco até próxima sexta-feira.'},
+    {id:'#RC-10454',title:'Escritura de transferência de imóvel',client:'Carlos Eduardo Mendes',phone:'(62) 9 6644-7788',status:'aberto',priority:'alta',category:'Imóveis',date:'01/07/2025',notes:'Primeira reunião com clientes agendada.'},
+    {id:'#RC-10455',title:'Certidão de casamento - tradução juramentada',client:'Lucia Helena Santos',phone:'(62) 9 5566-9900',status:'andamento',priority:'media',category:'Certidões',date:'01/07/2025',notes:'Aguardando tradutor parceiro juramentado.'},
+    {id:'#RC-10456',title:'Dúvida sobre inventário extrajudicial',client:'Paulo Roberto Rocha',phone:'(62) 9 4455-1122',status:'aberto',priority:'baixa',category:'Notas Públicas',date:'02/07/2025',notes:'Consulta inicial por WhatsApp.'},
+    {id:'#RC-10457',title:'Procuração para representação bancária',client:'Fátima Regina Lima',phone:'(62) 9 3344-0011',status:'concluido',priority:'media',category:'Procurações',date:'02/07/2025',notes:'Procuração lavrada e entregue.'},
+  ];
+  renderTickets();
+  updateStats();
+  updateActivity();
+}
+
+function statusLabel(s) {
+  return {aberto:'Aberto',andamento:'Em Andamento',concluido:'Concluído',cancelado:'Cancelado'}[s]||s;
+}
+function prioLabel(p) {
+  return {alta:'Alta',media:'Média',baixa:'Baixa'}[p]||p;
+}
+function prioClass(p) {
+  return {alta:'high',media:'medium',baixa:'low'}[p]||'low';
+}
+
+function renderTickets() {
+  var search = document.getElementById('searchInput').value.toLowerCase();
+  var statusF = document.getElementById('statusFilter').value;
+  var priorityF = document.getElementById('priorityFilter').value;
+  var filtered = tickets.filter(function(t){
+    var matchTab = tabFilter==='todos'||t.status===tabFilter;
+    var matchSearch = t.id.toLowerCase().includes(search)||
+      t.title.toLowerCase().includes(search)||
+      t.client.toLowerCase().includes(search);
+    var matchStatus = !statusF||t.status===statusF;
+    var matchPriority = !priorityF||t.priority===priorityF;
+    return matchTab&&matchSearch&&matchStatus&&matchPriority;
+  });
+  var body = document.getElementById('ticketBody');
+  if(filtered.length===0){
+    body.innerHTML='<tr><td colspan="7" style="text-align:center;padding:3rem;color:#a0aec0">Nenhum chamado encontrado</td></tr>';
+    return;
+  }
+  body.innerHTML=filtered.map(function(t){
+    return '<tr>'+
+      '<td><span class="ticket-id">'+t.id+'</span></td>'+
+      '<td><div class="ticket-title" title="'+t.title+'">'+t.title+'</div>'+
+      '<div class="ticket-sub">'+t.category+'</div></td>'+
+      '<td><div style="font-weight:600;font-size:.85rem">'+t.client+'</div>'+
+      '<div class="ticket-sub">'+t.phone+'</div></td>'+
+      '<td><span class="badge badge-'+t.status+'">'+statusLabel(t.status)+'</span></td>'+
+      '<td><span class="priority-dot p-'+prioClass(t.priority)+'"></span>'+prioLabel(t.priority)+'</td>'+
+      '<td style="font-size:.81rem;color:#718096">'+t.date+'</td>'+
+      '<td>'+
+        '<button class="action-btn btn-view" onclick="viewTicket(\'' + t.id + '\')">Ver</button>'+
+        '<button class="action-btn btn-edit" onclick="editTicket(\'' + t.id + '\')">Editar</button>'+
+      '</td>'+
+    '</tr>';
+  }).join('');
+}
+
+function updateStats() {
+  document.getElementById('totalTickets').textContent = tickets.length;
+  document.getElementById('resolvedTickets').textContent = tickets.filter(function(t){return t.status==='concluido';}).length;
+  document.getElementById('progressTickets').textContent = tickets.filter(function(t){return t.status==='andamento';}).length;
+  document.getElementById('waitingTickets').textContent = tickets.filter(function(t){return t.status==='aberto';}).length;
+  document.getElementById('cnt-todos').textContent = tickets.length;
+  document.getElementById('cnt-aberto').textContent = tickets.filter(function(t){return t.status==='aberto';}).length;
+  document.getElementById('cnt-andamento').textContent = tickets.filter(function(t){return t.status==='andamento';}).length;
+  document.getElementById('cnt-concluido').textContent = tickets.filter(function(t){return t.status==='concluido';}).length;
+}
+
+function updateActivity() {
+  var list = document.getElementById('activityList');
+  var recent = tickets.slice(-5).reverse();
+  if(recent.length===0){list.innerHTML='<p style="color:#a0aec0;font-size:.85rem">Nenhuma atividade ainda.</p>';return;}
+  list.innerHTML = recent.map(function(t){
+    return '<div class="activity-item">'+
+      '<div class="activity-dot"></div>'+
+      '<div class="activity-content">'+
+        '<p><strong>'+t.client+'</strong> &mdash; '+t.title.substring(0,45)+'...</p>'+
+        '<span>'+t.date+' &bull; '+statusLabel(t.status)+'</span>'+
+      '</div></div>';
+  }).join('');
+}
+
+function filterTickets(){renderTickets();}
+
+function setTab(btn,tab){
+  tabFilter=tab;
+  document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active');});
+  btn.classList.add('active');
+  renderTickets();
+}
+
+function openNewTicket(){
+  document.getElementById('modalTitle').textContent='Novo Chamado de Atendimento';
+  document.getElementById('modalContent').innerHTML=
+    '<div class="form-group"><label>Nome do Cliente</label>'+
+    '<input type="text" class="form-control" id="mClientName" placeholder="Nome completo"></div>'+
+    '<div class="form-group"><label>Telefone / WhatsApp</label>'+
+    '<input type="text" class="form-control" id="mClientPhone" placeholder="(62) 9 9999-9999"></div>'+
+    '<div class="form-group"><label>Assunto</label>'+
+    '<input type="text" class="form-control" id="mSubject" placeholder="Assunto do chamado"></div>'+
+    '<div class="form-group"><label>Categoria</label>'+
+    '<select class="form-control" id="mCategory">'+categories.map(function(c){return '<option>'+c+'</option>';}).join('')+'</select></div>'+
+    '<div class="form-group"><label>Prioridade</label>'+
+    '<select class="form-control" id="mPriority"><option value="baixa">Baixa</option><option value="media" selected>Média</option><option value="alta">Alta</option></select></div>'+
+    '<div class="form-group"><label>Descrição / Observações</label>'+
+    '<textarea class="form-control" id="mNotes" placeholder="Detalhes do atendimento..."></textarea></div>'+
+    '<button class="btn btn-primary" style="width:100%;margin-top:.5rem" onclick="saveNewTicket()">Salvar Chamado</button>';
+  document.getElementById('ticketModal').classList.add('active');
+}
+
+function saveNewTicket(){
+  var name=document.getElementById('mClientName').value.trim();
+  var phone=document.getElementById('mClientPhone').value.trim();
+  var subject=document.getElementById('mSubject').value.trim();
+  if(!name||!subject){alert('Preencha o nome do cliente e o assunto!');return;}
+  var t={
+    id:genId(),title:subject,client:name,
+    phone:phone||'Não informado',
+    status:'aberto',
+    priority:document.getElementById('mPriority').value,
+    category:document.getElementById('mCategory').value,
+    date:today(),
+    notes:document.getElementById('mNotes').value
+  };
+  tickets.push(t);
+  updateStats();updateActivity();renderTickets();closeModal();
+  showNotif('Chamado '+t.id+' aberto com sucesso!');
+}
+
+function quickAddTicket(){
+  var name=document.getElementById('qClientName').value.trim();
+  var phone=document.getElementById('qClientPhone').value.trim();
+  var subject=document.getElementById('qSubject').value.trim();
+  if(!name||!subject){alert('Preencha o nome e o assunto!');return;}
+  var t={
+    id:genId(),title:subject,client:name,
+    phone:phone||'Não informado',
+    status:'aberto',
+    priority:document.getElementById('qPriority').value,
+    category:document.getElementById('qCategory').value,
+    date:today(),notes:''
+  };
+  tickets.push(t);
+  updateStats();updateActivity();renderTickets();
+  document.getElementById('qClientName').value='';
+  document.getElementById('qClientPhone').value='';
+  document.getElementById('qSubject').value='';
+  showNotif('Chamado '+t.id+' aberto!');
+}
+
+function viewTicket(id){
+  var t=tickets.find(function(x){return x.id===id;});
+  if(!t)return;
+  document.getElementById('modalTitle').textContent='Chamado '+t.id;
+  document.getElementById('modalContent').innerHTML=
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem">'+
+      '<div><label style="font-size:.78rem;font-weight:700;color:#718096;text-transform:uppercase">Cliente</label><p style="font-weight:600">'+t.client+'</p></div>'+
+      '<div><label style="font-size:.78rem;font-weight:700;color:#718096;text-transform:uppercase">Telefone</label><p>'+t.phone+'</p></div>'+
+      '<div><label style="font-size:.78rem;font-weight:700;color:#718096;text-transform:uppercase">Status</label><p><span class="badge badge-'+t.status+'">'+statusLabel(t.status)+'</span></p></div>'+
+      '<div><label style="font-size:.78rem;font-weight:700;color:#718096;text-transform:uppercase">Prioridade</label><p>'+prioLabel(t.priority)+'</p></div>'+
+      '<div><label style="font-size:.78rem;font-weight:700;color:#718096;text-transform:uppercase">Categoria</label><p>'+t.category+'</p></div>'+
+      '<div><label style="font-size:.78rem;font-weight:700;color:#718096;text-transform:uppercase">Data</label><p>'+t.date+'</p></div>'+
+    '</div>'+
+    '<div style="margin-bottom:1rem"><label style="font-size:.78rem;font-weight:700;color:#718096;text-transform:uppercase">Assunto</label><p style="margin-top:4px;font-weight:600">'+t.title+'</p></div>'+
+    '<div><label style="font-size:.78rem;font-weight:700;color:#718096;text-transform:uppercase">Observações</label>'+
+    '<p style="background:#f7fafc;padding:10px;border-radius:8px;font-size:.87rem;margin-top:4px">'+
+    (t.notes||'Nenhuma observação')+'</p></div>'+
+    '<div style="display:flex;gap:.75rem;margin-top:1.5rem">'+
+      '<button class="btn btn-primary" onclick="closeModal();setTimeout(function(){editTicket(\'' + id + '\')},100)">Editar</button>'+
+      (t.status!=='concluido'?'<button class="btn" style="background:#38a169;color:#fff" onclick="closeStatus(\'' + id + '\')">✔ Concluir</button>':'')+
+    '</div>';
+  document.getElementById('ticketModal').classList.add('active');
+}
+
+function editTicket(id){
+  var t=tickets.find(function(x){return x.id===id;});
+  if(!t)return;
+  document.getElementById('modalTitle').textContent='Editar Chamado '+t.id;
+  document.getElementById('modalContent').innerHTML=
+    '<div class="form-group"><label>Nome do Cliente</label>'+
+    '<input type="text" class="form-control" id="eClientName" value="'+t.client+'"></div>'+
+    '<div class="form-group"><label>Telefone / WhatsApp</label>'+
+    '<input type="text" class="form-control" id="eClientPhone" value="'+t.phone+'"></div>'+
+    '<div class="form-group"><label>Assunto</label>'+
+    '<input type="text" class="form-control" id="eSubject" value="'+t.title+'"></div>'+
+    '<div class="form-group"><label>Status</label>'+
+    '<select class="form-control" id="eStatus">'+
+    statuses.map(function(s){return '<option value="'+s+'"'+(t.status===s?' selected':'')+'>'+statusLabel(s)+'</option>';}).join('')+
+    '</select></div>'+
+    '<div class="form-group"><label>Prioridade</label>'+
+    '<select class="form-control" id="ePriority">'+
+    ['baixa','media','alta'].map(function(p){return '<option value="'+p+'"'+(t.priority===p?' selected':'')+'>'+prioLabel(p)+'</option>';}).join('')+
+    '</select></div>'+
+    '<div class="form-group"><label>Observações</label>'+
+    '<textarea class="form-control" id="eNotes">'+t.notes+'</textarea></div>'+
+    '<button class="btn btn-primary" style="width:100%;margin-top:.5rem" onclick="saveEdit(\'' + id + '\')">✔ Salvar Alterações</button>';
+  document.getElementById('ticketModal').classList.add('active');
+}
+
+function saveEdit(id){
+  var t=tickets.find(function(x){return x.id===id;});
+  if(!t)return;
+  t.client=document.getElementById('eClientName').value;
+  t.phone=document.getElementById('eClientPhone').value;
+  t.title=document.getElementById('eSubject').value;
+  t.status=document.getElementById('eStatus').value;
+  t.priority=document.getElementById('ePriority').value;
+  t.notes=document.getElementById('eNotes').value;
+  updateStats();updateActivity();renderTickets();closeModal();
+  showNotif('Chamado '+id+' atualizado com sucesso!');
+}
+
+function closeStatus(id){
+  var t=tickets.find(function(x){return x.id===id;});
+  if(t){
+    t.status='concluido';
+    updateStats();updateActivity();renderTickets();closeModal();
+    showNotif('Chamado '+id+' concluído!');
+  }
+}
+
+function closeModal(){
+  document.getElementById('ticketModal').classList.remove('active');
+}
+
+function showNotif(msg){
+  var n=document.getElementById('notification');
+  document.getElementById('notifText').textContent=msg;
+  n.classList.add('show');
+  setTimeout(function(){n.classList.remove('show');},3500);
+}
+
+document.getElementById('ticketModal').addEventListener('click',function(e){
+  if(e.target===this)closeModal();
+});
+
+initTickets();
+</script>
+</body>
+</html>
